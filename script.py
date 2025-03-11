@@ -5,6 +5,7 @@ import pandas as pd
 FILE_PATH = "Workshop details.xlsx"
 try:
     df = pd.read_excel(FILE_PATH)
+    df.columns = df.columns.str.strip().str.lower()  # Normalize column names
 except FileNotFoundError:
     st.error("Error: The specified file was not found. Please upload the correct file.")
     st.stop()
@@ -14,9 +15,9 @@ except Exception as e:
 
 # Function to find nearest pincodes
 def get_nearest_pincodes(pincode, df, num_results=5):
-    if pincode not in df["Pincode"].values:
+    if pincode not in df["pincode"].values:
         return df.head(num_results)
-    return df[df["Pincode"] == pincode].head(num_results)
+    return df[df["pincode"] == pincode].head(num_results)
 
 # Streamlit UI
 def main():
@@ -29,14 +30,21 @@ def main():
     # Search by Pincode
     pincode = st.text_input("Enter Pincode:")
     
+    # Check if required columns exist
+    required_columns = ["channel", "body shop", "state"]
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        st.error(f"Missing columns in the dataset: {', '.join(missing_columns)}")
+        st.stop()
+    
     # Filters
-    channels = df["Channel"].dropna().unique().tolist()
+    channels = df["channel"].dropna().unique().tolist()
     channel = st.selectbox("Select Channel:", ["All"] + channels)
     
-    bodyshops = df["Body Shop"].dropna().unique().tolist()
+    bodyshops = df["body shop"].dropna().unique().tolist()
     bodyshop = st.selectbox("Body Shop:", ["All"] + bodyshops)
     
-    states = df["State"].dropna().unique().tolist()
+    states = df["state"].dropna().unique().tolist()
     state = st.selectbox("Select State:", ["All"] + states)
     
     # Filter data based on inputs
@@ -44,11 +52,11 @@ def main():
     if pincode:
         filtered_df = get_nearest_pincodes(pincode, df)
     if channel != "All":
-        filtered_df = filtered_df[filtered_df["Channel"] == channel]
+        filtered_df = filtered_df[filtered_df["channel"] == channel]
     if bodyshop != "All":
-        filtered_df = filtered_df[filtered_df["Body Shop"] == bodyshop]
+        filtered_df = filtered_df[filtered_df["body shop"] == bodyshop]
     if state != "All":
-        filtered_df = filtered_df[filtered_df["State"] == state]
+        filtered_df = filtered_df[filtered_df["state"] == state]
     
     # Display filtered data
     if not filtered_df.empty:
