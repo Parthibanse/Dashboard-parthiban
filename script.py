@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-from geopy.distance import geodesic
-pip install geopy
 
 # Load dataset
 FILE_PATH = "/mnt/data/Workshop details.xlsx"
