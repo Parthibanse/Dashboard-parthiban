@@ -13,11 +13,18 @@ except Exception as e:
     st.error(f"Error loading the file: {e}")
     st.stop()
 
+# Check if required columns exist
+required_columns = ["pincode", "channel", "body shop", "state"]
+missing_columns = [col for col in required_columns if col not in df.columns]
+if missing_columns:
+    st.error(f"Missing columns in the dataset: {', '.join(missing_columns)}")
+    st.stop()
+
 # Function to find nearest pincodes
 def get_nearest_pincodes(pincode, df, num_results=5):
-    if pincode not in df["pincode"].values:
+    if pincode not in df["pincode"].astype(str).values:
         return df.head(num_results)
-    return df[df["pincode"] == pincode].head(num_results)
+    return df[df["pincode"].astype(str) == str(pincode)].head(num_results)
 
 # Streamlit UI
 def main():
@@ -29,13 +36,6 @@ def main():
     
     # Search by Pincode
     pincode = st.text_input("Enter Pincode:")
-    
-    # Check if required columns exist
-    required_columns = ["channel", "body shop", "state"]
-    missing_columns = [col for col in required_columns if col not in df.columns]
-    if missing_columns:
-        st.error(f"Missing columns in the dataset: {', '.join(missing_columns)}")
-        st.stop()
     
     # Filters
     channels = df["channel"].dropna().unique().tolist()
